@@ -2,6 +2,8 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 
+use enigo::*;
+
 fn main() {
     // Create a path to the desired file
     let path = Path::new("hello.txt");
@@ -25,9 +27,15 @@ fn main() {
 }
 
 fn print_by_character(message: &str) {
+    let mut enigo = Enigo::new();
+    enigo.key_down(Key::Meta);
+    enigo.key_down(Key::Layout('1'));
+    enigo.key_up(Key::Layout('1'));
+    enigo.key_up(Key::Meta);
     for letter in message.chars() {
-        if letter != ' ' {
-            println!("{}", letter);
+        if letter != ' ' && letter != '\n' {
+            enigo.key_click(Key::Layout(letter));
+            enigo.key_click(Key::Return);
         }
     }
 }
