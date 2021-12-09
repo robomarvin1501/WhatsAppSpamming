@@ -4,6 +4,8 @@ use std::path::Path;
 
 use enigo::*;
 
+// TODO needs a failsafe of some sort
+
 fn main() {
     // Create a path to the desired file
     let path = Path::new("hello.txt");
@@ -27,15 +29,15 @@ fn main() {
 }
 
 fn print_by_character(message: &str) {
+    let clean_message: String = message.chars().filter(|c| !c.is_whitespace()).collect();
+
     let mut enigo = Enigo::new();
     enigo.key_down(Key::Meta);
-    enigo.key_down(Key::Layout('1'));
-    enigo.key_up(Key::Layout('1'));
+    enigo.key_click(Key::Layout('1'));
     enigo.key_up(Key::Meta);
-    for letter in message.chars() {
-        if letter != ' ' && letter != '\n' {
-            enigo.key_click(Key::Layout(letter));
-            enigo.key_click(Key::Return);
-        }
+
+    for letter in clean_message.chars() {
+        enigo.key_click(Key::Layout(letter));
+        enigo.key_click(Key::Return);
     }
 }
