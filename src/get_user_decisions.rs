@@ -43,7 +43,7 @@ pub fn get_user_specs() -> UserSpecifications {
 fn get_single_position(prompt: &str) -> i32 {
     let mut user_input = String::new();
     let stdin = io::stdin();
-    let mut position: i32;
+    let position: i32;
 
     print!("{}", prompt);
     io::stdout().flush().unwrap();

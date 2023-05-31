@@ -1,11 +1,12 @@
-use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use std::{env, io};
 
 use enigo::*;
 
 mod get_user_decisions;
+mod show_screen_coords;
 
 // TODO needs a failsafe of some sort
 
@@ -34,17 +35,80 @@ fn main_old() {
     )
 }
 
-fn main() {
-    let specs = get_user_decisions::get_user_specs();
-    println!("{:?}", specs);
+#[derive(Debug)]
+enum WhichMain {
+    GetCoords,
+    Spam,
+    Exit,
+}
 
-    print_whole_message(
-        specs.message.as_str(),
-        specs.browser_position.x,
-        specs.browser_position.y,
-        specs.whatsapp_position.x,
-        specs.whatsapp_position.y,
-    )
+fn main() {
+    let user_choice = coords_run_or_exit();
+    println!("{:?}", user_choice);
+
+    loop {
+        match user_choice {
+            WhichMain::Exit => return,
+            WhichMain::GetCoords => show_screen_coords::show_screen_coords(),
+            WhichMain::Spam => {
+                let specs = get_user_decisions::get_user_specs();
+                println!("{:?}", specs);
+                print_whole_message(
+                    specs.message.as_str(),
+                    specs.browser_position.x,
+                    specs.browser_position.y,
+                    specs.whatsapp_position.x,
+                    specs.whatsapp_position.y,
+                )
+            }
+        }
+    }
+}
+
+fn coords_run_or_exit() -> WhichMain {
+    let mut user_input = String::new();
+    let stdin = io::stdin();
+    let mut choice: WhichMain;
+
+    println!("Please select a run option: ");
+    println!("Show screen coordinates: (c)\nStart the spammer: (s)\nExit: (e)");
+
+    loop {
+        match user_input.as_str() {
+            "c" => {
+                choice = WhichMain::GetCoords;
+                break;
+            }
+            "s" => {
+                choice = WhichMain::Spam;
+                break;
+            }
+            "e" => {
+                choice = WhichMain::Exit;
+                break;
+            }
+            "" => {}
+            _ => println!("{}: Not a valid choice", user_input),
+        };
+
+        loop {
+            user_input.clear();
+            print!("Your selection (c/s/e): ");
+            io::stdout().flush().unwrap();
+            match stdin.read_line(&mut user_input) {
+                Ok(_) => {
+                    user_input = String::from(user_input.trim());
+                    break;
+                }
+                Err(e) => {
+                    println!("ERROR: {e}");
+                    println!("Please try again");
+                }
+            }
+        }
+    }
+
+    return choice;
 }
 
 fn read_message_from_file(path: &Path) -> String {
