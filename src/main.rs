@@ -1,6 +1,8 @@
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use std::thread::sleep;
+use std::time::Duration;
 use std::{env, io};
 
 use enigo::*;
@@ -53,13 +55,16 @@ fn main() {
             WhichMain::Spam => {
                 let specs = get_user_decisions::get_user_specs();
                 println!("{:?}", specs);
-                print_whole_message(
-                    specs.message.as_str(),
-                    specs.browser_position.x,
-                    specs.browser_position.y,
-                    specs.whatsapp_position.x,
-                    specs.whatsapp_position.y,
-                )
+                for _ in 0..specs.repeats {
+                    print_whole_message(
+                        specs.message.as_str(),
+                        specs.browser_position.x,
+                        specs.browser_position.y,
+                        specs.whatsapp_position.x,
+                        specs.whatsapp_position.y,
+                    );
+                    sleep(Duration::from_millis((specs.time_period * 1000.0) as u64));
+                }
             }
         }
         user_choice = coords_run_or_exit();
