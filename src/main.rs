@@ -43,7 +43,7 @@ enum WhichMain {
 }
 
 fn main() {
-    let user_choice = coords_run_or_exit();
+    let mut user_choice = coords_run_or_exit();
     println!("{:?}", user_choice);
 
     loop {
@@ -62,6 +62,7 @@ fn main() {
                 )
             }
         }
+        user_choice = coords_run_or_exit();
     }
 }
 

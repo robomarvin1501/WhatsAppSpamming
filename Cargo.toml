@@ -7,4 +7,4 @@ edition = "2018"
 
 # Depends on xdotool
 [dependencies]
-enigo = "0.0.14"
+enigo = "0.1.2"
