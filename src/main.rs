@@ -7,6 +7,8 @@ use std::{env, io};
 
 use enigo::*;
 
+use crate::get_user_decisions::get_user_specs;
+
 mod get_user_decisions;
 mod show_screen_coords;
 
@@ -41,6 +43,7 @@ fn main_old() {
 enum WhichMain {
     GetCoords,
     SpamWholeMessage,
+    SpamWords,
     SpamLetters,
     Exit,
 }
@@ -80,6 +83,14 @@ fn main() {
                     )
                 }
             }
+            WhichMain::SpamWords => {
+                let specs = get_user_specs();
+                println!("{:?}", specs);
+                for _ in 0..specs.repeats{
+                    print_by_word(&specs);
+                    sleep(Duration::from_millis((specs.time_period*1000.0) as u64));
+                }
+            }
         }
         user_choice = coords_run_or_exit();
     }
@@ -91,7 +102,12 @@ fn coords_run_or_exit() -> WhichMain {
     let choice: WhichMain;
 
     println!("Please select a run option: ");
-    println!("Show screen coordinates: (c)\nSpam a whole message at once (m)\nSpam letter by letter (l)\nExit: (e)");
+    println!("{}\n{}\n{}\n{}\n{}",
+             "Show screen coordinates: (c)",
+             "Spam a whole message at once (m)",
+             "Spam word by word (w)",
+             "Spam letter by letter (l)",
+             "Exit: (e)");
 
     loop {
         match user_input.as_str() {
@@ -101,6 +117,10 @@ fn coords_run_or_exit() -> WhichMain {
             }
             "m" => {
                 choice = WhichMain::SpamWholeMessage;
+                break;
+            }
+            "w" => {
+                choice = WhichMain::SpamWords;
                 break;
             }
             "l" => {
@@ -117,7 +137,7 @@ fn coords_run_or_exit() -> WhichMain {
 
         loop {
             user_input.clear();
-            print!("Your selection (c/m/l/e): ");
+            print!("Your selection (c/m/w/l/e): ");
             io::stdout().flush().unwrap();
             match stdin.read_line(&mut user_input) {
                 Ok(_) => {
@@ -149,6 +169,36 @@ fn read_message_from_file(path: &Path) -> String {
         Err(why) => panic!("Couldn't read {}: {}", display, why),
         Ok(_) => s,
     }
+}
+
+fn print_by_word(
+    message: &str,
+    browser_x: i32,
+    browser_y: i32,
+    whatsapp_x: i32,
+    whatsapp_y: i32,
+){
+    let words = message.split_whitespace();
+    
+    let mut enigo = Enigo::new();
+    //Move to browser and click.
+    enigo.mouse_move_to(
+        browser_x,
+        browser_y);
+    enigo.mouse_click(MouseButton::Left);
+
+    //Move mouse to whatsapp position.
+    enigo.mouse_move_to(
+        whatsapp_x,
+        whatsapp_y);
+    enigo.mouse_click(MouseButton::Left);
+    
+    //Print each word
+    for word in words{
+        enigo.key_sequence(word);
+        enigo.key_click(Key::Return);
+    }
+
 }
 
 fn print_by_character(
