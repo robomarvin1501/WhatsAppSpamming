@@ -117,7 +117,7 @@ fn coords_run_or_exit() -> WhichMain {
 
         loop {
             user_input.clear();
-            print!("Your selection (c/s/e): ");
+            print!("Your selection (c/m/l/e): ");
             io::stdout().flush().unwrap();
             match stdin.read_line(&mut user_input) {
                 Ok(_) => {
