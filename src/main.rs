@@ -7,8 +7,6 @@ use std::{env, io};
 
 use enigo::*;
 
-use crate::get_user_decisions::get_user_specs;
-
 mod get_user_decisions;
 mod show_screen_coords;
 
@@ -84,11 +82,17 @@ fn main() {
                 }
             }
             WhichMain::SpamWords => {
-                let specs = get_user_specs();
+                let specs = get_user_decisions::get_user_specs();
                 println!("{:?}", specs);
-                for _ in 0..specs.repeats{
-                    print_by_word(&specs);
-                    sleep(Duration::from_millis((specs.time_period*1000.0) as u64));
+                for _ in 0..specs.repeats {
+                    print_by_word(
+                        specs.message.as_str(),
+                        specs.browser_position.x,
+                        specs.browser_position.y,
+                        specs.whatsapp_position.x,
+                        specs.whatsapp_position.y,
+                    );
+                    sleep(Duration::from_millis((specs.time_period * 1000.0) as u64));
                 }
             }
         }
@@ -102,12 +106,14 @@ fn coords_run_or_exit() -> WhichMain {
     let choice: WhichMain;
 
     println!("Please select a run option: ");
-    println!("{}\n{}\n{}\n{}\n{}",
-             "Show screen coordinates: (c)",
-             "Spam a whole message at once (m)",
-             "Spam word by word (w)",
-             "Spam letter by letter (l)",
-             "Exit: (e)");
+    println!(
+        "{}\n{}\n{}\n{}\n{}",
+        "Show screen coordinates: (c)",
+        "Spam a whole message at once (m)",
+        "Spam word by word (w)",
+        "Spam letter by letter (l)",
+        "Exit: (e)"
+    );
 
     loop {
         match user_input.as_str() {
@@ -172,33 +178,28 @@ fn read_message_from_file(path: &Path) -> String {
 }
 
 fn print_by_word(
-    message: &str,
-    browser_x: i32,
-    browser_y: i32,
-    whatsapp_x: i32,
+    message: &str, 
+    browser_x: i32, 
+    browser_y: i32, 
+    whatsapp_x: i32, 
     whatsapp_y: i32,
-){
+    ) {
     let words = message.split_whitespace();
-    
+
     let mut enigo = Enigo::new();
     //Move to browser and click.
-    enigo.mouse_move_to(
-        browser_x,
-        browser_y);
+    enigo.mouse_move_to(browser_x, browser_y);
     enigo.mouse_click(MouseButton::Left);
 
     //Move mouse to whatsapp position.
-    enigo.mouse_move_to(
-        whatsapp_x,
-        whatsapp_y);
+    enigo.mouse_move_to(whatsapp_x, whatsapp_y);
     enigo.mouse_click(MouseButton::Left);
-    
+
     //Print each word
-    for word in words{
+    for word in words {
         enigo.key_sequence(word);
         enigo.key_click(Key::Return);
     }
-
 }
 
 fn print_by_character(
