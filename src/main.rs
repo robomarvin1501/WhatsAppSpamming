@@ -40,7 +40,8 @@ fn main_old() {
 #[derive(Debug)]
 enum WhichMain {
     GetCoords,
-    Spam,
+    SpamWholeMessage,
+    SpamLetters,
     Exit,
 }
 
@@ -52,7 +53,7 @@ fn main() {
         match user_choice {
             WhichMain::Exit => return,
             WhichMain::GetCoords => show_screen_coords::show_screen_coords(),
-            WhichMain::Spam => {
+            WhichMain::SpamWholeMessage => {
                 let specs = get_user_decisions::get_user_specs();
                 println!("{:?}", specs);
                 for _ in 0..specs.repeats {
@@ -66,6 +67,19 @@ fn main() {
                     sleep(Duration::from_millis((specs.time_period * 1000.0) as u64));
                 }
             }
+            WhichMain::SpamLetters => {
+                let specs = get_user_decisions::get_user_specs();
+                println!("{:?}", specs);
+                for _ in 0..specs.repeats {
+                    print_by_character(
+                        specs.message.as_str(),
+                        specs.browser_position.x,
+                        specs.browser_position.y,
+                        specs.whatsapp_position.x,
+                        specs.whatsapp_position.y,
+                    )
+                }
+            }
         }
         user_choice = coords_run_or_exit();
     }
@@ -74,10 +88,10 @@ fn main() {
 fn coords_run_or_exit() -> WhichMain {
     let mut user_input = String::new();
     let stdin = io::stdin();
-    let mut choice: WhichMain;
+    let choice: WhichMain;
 
     println!("Please select a run option: ");
-    println!("Show screen coordinates: (c)\nStart the spammer: (s)\nExit: (e)");
+    println!("Show screen coordinates: (c)\nSpam a whole message at once (m)\nSpam letter by letter (l)\nExit: (e)");
 
     loop {
         match user_input.as_str() {
@@ -85,8 +99,12 @@ fn coords_run_or_exit() -> WhichMain {
                 choice = WhichMain::GetCoords;
                 break;
             }
-            "s" => {
-                choice = WhichMain::Spam;
+            "m" => {
+                choice = WhichMain::SpamWholeMessage;
+                break;
+            }
+            "l" => {
+                choice = WhichMain::SpamLetters;
                 break;
             }
             "e" => {
@@ -133,13 +151,21 @@ fn read_message_from_file(path: &Path) -> String {
     }
 }
 
-fn print_by_character(message: &str) {
+fn print_by_character(
+    message: &str,
+    browser_x: i32,
+    browser_y: i32,
+    whatsapp_x: i32,
+    whatsapp_y: i32,
+) {
     let clean_message: String = message.chars().filter(|c| !c.is_whitespace()).collect();
 
     let mut enigo = Enigo::new();
-    enigo.key_down(Key::Meta);
-    enigo.key_click(Key::Layout('1'));
-    enigo.key_up(Key::Meta);
+    enigo.mouse_move_to(browser_x, browser_y);
+    enigo.mouse_click(MouseButton::Left);
+
+    enigo.mouse_move_to(whatsapp_x, whatsapp_y);
+    enigo.mouse_click(MouseButton::Left);
 
     for letter in clean_message.chars() {
         enigo.key_click(Key::Layout(letter));

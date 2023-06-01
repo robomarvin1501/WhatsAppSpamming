@@ -12,7 +12,7 @@ pub fn show_screen_coords() {
             (_, _) => {
                 println!("{:?}", cursor_location);
                 sleep(Duration::from_millis(500));
-            },
+            }
         };
     }
 }
