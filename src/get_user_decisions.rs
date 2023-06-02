@@ -17,6 +17,13 @@ pub struct UserSpecifications {
     pub whatsapp_position: ScreenPosition,
 }
 
+/// Wrapper function exposed to main.rs that gets all of the information from the user, and then
+/// returns it all in the UserSpecifications struct
+///
+/// # Examples
+/// ```
+/// let user_specs: UserSpecifications = get_user_specs();
+/// ```
 pub fn get_user_specs() -> UserSpecifications {
     let file_or_stdin = get_file_or_stdin();
     let message = get_user_message(&file_or_stdin);
@@ -40,6 +47,14 @@ pub fn get_user_specs() -> UserSpecifications {
     return user_specs;
 }
 
+/// Gets a single integer position on the screen
+/// TODO does not check that the position is within the bounds of the screen.
+///
+/// # Examples
+/// ```
+/// let x_position = get_single_position("Please input the x position of the browser: ");
+/// let y_position = get_single_position("Please input the y position of the browser: ");
+/// ```
 fn get_single_position(prompt: &str) -> i32 {
     let mut user_input = String::new();
     let stdin = io::stdin();
@@ -89,6 +104,15 @@ fn get_single_position(prompt: &str) -> i32 {
     return position;
 }
 
+/// Returns the ScreenPosition struct storing the position of a given target
+/// Also takes the name of the target, with any relevant prefixes to be passed to the prompt called
+/// in get_single_position()
+///
+/// # Examples
+/// ```
+/// let browser_position: ScreenPosition = get_x_and_y_position("the browser");
+/// let whatsapp_position: ScreenPosition = get_x_and_y_position("whatsapp");
+/// ```
 fn get_x_and_y_position(target: &str) -> ScreenPosition {
     let x_position =
         get_single_position(format!("Please enter the x position of {}: ", target).as_str());
@@ -101,6 +125,12 @@ fn get_x_and_y_position(target: &str) -> ScreenPosition {
     }
 }
 
+/// Get integer user input. This is aimed at getting how many times the message should be repeated
+///
+/// # Examples
+/// ```
+/// let repeats: i32 = get_number_of_repeats();
+/// ```
 fn get_number_of_repeats() -> i32 {
     let mut user_input = String::new();
     let stdin = io::stdin();
@@ -147,6 +177,14 @@ fn get_number_of_repeats() -> i32 {
     user_input.parse::<i32>().unwrap()
 }
 
+/// Get the message from the user from either a file or stdin.
+/// Files are currently unsupported and default to stdin.
+///
+/// # Examples
+/// ```
+/// let specs: UserSpecifications = get_user_specs();
+/// let message: String = get_user_message(&specs.file_or_stdin);
+/// ```
 fn get_user_message(target: &String) -> String {
     let mut user_acceptance = String::new();
     let stdin = io::stdin();
@@ -183,12 +221,19 @@ fn get_user_message(target: &String) -> String {
     return String::from(message.trim());
 }
 
+/// Get the message from a file. Currently incomplete and defaults to get_stdin_message()
 fn get_file_message() -> String {
     println!("NOT SUPPORTED: DEFAULTING TO GETTING FROM STDIN");
     let user_input = get_stdin_message();
     return user_input;
 }
 
+/// Gets a message from the user via stdin, without failing.
+///
+/// # Examples
+/// ```
+/// let message: String = get_stdin_message();
+/// ```
 fn get_stdin_message() -> String {
     let mut user_input: String = String::new();
     let stdin = io::stdin();
@@ -208,6 +253,14 @@ fn get_stdin_message() -> String {
     return user_input;
 }
 
+/// Gets whether or not the user wishes to use stdin or a file to create the message that they are
+/// sending.
+/// Will only return the available options, repeatedly doesn't accept anything else.
+///
+/// # Examples
+/// ```
+/// let file_or_stdin: String = get_file_or_stdin();
+/// ```
 fn get_file_or_stdin() -> String {
     let mut user_input: String = String::new();
     let stdin = io::stdin();
@@ -241,6 +294,11 @@ fn get_file_or_stdin() -> String {
     return user_input;
 }
 
+/// Gets the period between messages
+///
+/// ```
+/// let repeating_period: f64 = get_repeating_period();
+/// ```
 fn get_repeating_period() -> f64 {
     let mut user_input: String = String::new();
     let stdin = io::stdin();
@@ -258,7 +316,6 @@ fn get_repeating_period() -> f64 {
     };
 
     loop {
-        // match user_input.chars().all(char::is_numeric) {
         let time_diff = user_input.parse::<f64>();
         match time_diff {
             Ok(_) => break,
