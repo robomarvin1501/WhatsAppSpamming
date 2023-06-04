@@ -1,11 +1,12 @@
 use std::fs::File;
+use std::io;
 use std::io::prelude::*;
 use std::path::Path;
 use std::thread::sleep;
 use std::time::Duration;
-use std::{env, io};
 
 use enigo::*;
+use get_user_decisions::UserSpecifications;
 
 mod get_user_decisions;
 mod show_screen_coords;
@@ -35,13 +36,7 @@ fn main() {
                 let specs = get_user_decisions::get_user_specs();
                 println!("{:?}", specs);
                 for _ in 0..specs.repeats {
-                    print_whole_message(
-                        specs.message.as_str(),
-                        specs.browser_position.x,
-                        specs.browser_position.y,
-                        specs.whatsapp_position.x,
-                        specs.whatsapp_position.y,
-                    );
+                    print_whole_message(&specs);
                     sleep(Duration::from_millis((specs.time_period * 1000.0) as u64));
                 }
             }
@@ -49,26 +44,14 @@ fn main() {
                 let specs = get_user_decisions::get_user_specs();
                 println!("{:?}", specs);
                 for _ in 0..specs.repeats {
-                    print_by_character(
-                        specs.message.as_str(),
-                        specs.browser_position.x,
-                        specs.browser_position.y,
-                        specs.whatsapp_position.x,
-                        specs.whatsapp_position.y,
-                    )
+                    print_by_character(&specs)
                 }
             }
             WhichMain::SpamWords => {
                 let specs = get_user_decisions::get_user_specs();
                 println!("{:?}", specs);
                 for _ in 0..specs.repeats {
-                    print_by_word(
-                        specs.message.as_str(),
-                        specs.browser_position.x,
-                        specs.browser_position.y,
-                        specs.whatsapp_position.x,
-                        specs.whatsapp_position.y,
-                    );
+                    print_by_word(&specs);
                     sleep(Duration::from_millis((specs.time_period * 1000.0) as u64));
                 }
             }
@@ -184,18 +167,22 @@ fn read_message_from_file(path: &Path) -> String {
 ///
 /// # Examples
 /// ```
-/// print_by_word("Never gonna give you up", 20, 1900, 989, 941);
+/// let specs: UserSpecifications = UserSpecifications{"Never gonna give you up", 20, 1900, 989, 941};
+/// print_by_word(&specs);
 /// ```
-fn print_by_word(message: &str, browser_x: i32, browser_y: i32, whatsapp_x: i32, whatsapp_y: i32) {
-    let words = message.split_whitespace();
+fn print_by_word(user_specs: &UserSpecifications) {
+    let words = user_specs.message.as_str().split_whitespace();
 
     let mut enigo = Enigo::new();
     //Move to browser and click.
-    enigo.mouse_move_to(browser_x, browser_y);
+    enigo.mouse_move_to(user_specs.browser_position.x, user_specs.browser_position.y);
     enigo.mouse_click(MouseButton::Left);
 
     //Move mouse to whatsapp position.
-    enigo.mouse_move_to(whatsapp_x, whatsapp_y);
+    enigo.mouse_move_to(
+        user_specs.whatsapp_position.x,
+        user_specs.whatsapp_position.y,
+    );
     enigo.mouse_click(MouseButton::Left);
 
     //Print each word
@@ -211,22 +198,25 @@ fn print_by_word(message: &str, browser_x: i32, browser_y: i32, whatsapp_x: i32,
 ///
 /// # Examples
 /// ```
-/// print_by_character("Never gonna give you up", 20, 1900, 989, 941);
+/// let specs: UserSpecifications = UserSpecifications{"Never gonna give you up", 20, 1900, 989, 941};
+/// print_by_character(&specs);
 /// ```
-fn print_by_character(
-    message: &str,
-    browser_x: i32,
-    browser_y: i32,
-    whatsapp_x: i32,
-    whatsapp_y: i32,
-) {
-    let clean_message: String = message.chars().filter(|c| !c.is_whitespace()).collect();
+fn print_by_character(user_specs: &UserSpecifications) {
+    let clean_message: String = user_specs
+        .message
+        .as_str()
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect();
 
     let mut enigo = Enigo::new();
-    enigo.mouse_move_to(browser_x, browser_y);
+    enigo.mouse_move_to(user_specs.browser_position.x, user_specs.browser_position.y);
     enigo.mouse_click(MouseButton::Left);
 
-    enigo.mouse_move_to(whatsapp_x, whatsapp_y);
+    enigo.mouse_move_to(
+        user_specs.whatsapp_position.x,
+        user_specs.whatsapp_position.y,
+    );
     enigo.mouse_click(MouseButton::Left);
 
     for letter in clean_message.chars() {
@@ -240,23 +230,21 @@ fn print_by_character(
 ///
 /// # Examples
 /// ```
-/// print_whole_message("Never gonna give you up", 20, 1900, 989, 941);
+/// let specs: UserSpecifications = UserSpecifications{"Never gonna give you up", 20, 1900, 989, 941};
+/// print_whole_message(&specs);
 /// ```
-fn print_whole_message(
-    message: &str,
-    browser_x: i32,
-    browser_y: i32,
-    whatsapp_x: i32,
-    whatsapp_y: i32,
-) {
+fn print_whole_message(user_specs: &UserSpecifications) {
     let mut enigo = Enigo::new();
 
-    enigo.mouse_move_to(browser_x, browser_y);
+    enigo.mouse_move_to(user_specs.browser_position.x, user_specs.browser_position.y);
     enigo.mouse_click(MouseButton::Left);
 
-    enigo.mouse_move_to(whatsapp_x, whatsapp_y);
+    enigo.mouse_move_to(
+        user_specs.whatsapp_position.x,
+        user_specs.whatsapp_position.y,
+    );
     enigo.mouse_click(MouseButton::Left);
 
-    enigo.key_sequence(message);
+    enigo.key_sequence(user_specs.message.as_str());
     enigo.key_click(Key::Return);
 }
