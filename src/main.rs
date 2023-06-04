@@ -12,31 +12,8 @@ mod show_screen_coords;
 
 // TODO needs a failsafe of some sort
 
-fn main_old() {
-    // Create a path to the desired file
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 5 {
-        println!("INSUFFICIENT ARGUMENTS");
-        println!("Expected 5 arguments, received {}", args.len());
-        println!("Arguments should be <message file path>, <browser_x>, <browser_y>, whatsapp message bar x>, <whatsapp message bar y>");
-        panic!("INSUFFICIENT ARGUMENTS");
-    }
-    println!("Reading from file: {}", &args[1]);
-    let path = Path::new(&args[1]);
-    // let display = path.display();
-
-    let message = read_message_from_file(path);
-    println!("{}", message);
-
-    print_whole_message(
-        &message,
-        args[2].parse::<i32>().unwrap(),
-        args[3].parse::<i32>().unwrap(),
-        args[4].parse::<i32>().unwrap(),
-        args[5].parse::<i32>().unwrap(),
-    )
-}
-
+/// [`WhichMain`] represents the user's choice of what part of the program to run, represented by an enum  
+/// Used by [`coords_run_or_exit()`]
 #[derive(Debug)]
 enum WhichMain {
     GetCoords,
@@ -100,6 +77,21 @@ fn main() {
     }
 }
 
+/// Gets from the user what part of the program to run, eg show the coordinates
+/// spamming options, or just exiting
+///
+/// Returns [`WhichMain`], to hold the user choice. This may be matched
+/// against for their input
+///
+///
+/// # Examples
+/// ```
+/// let user_choice: WhichMain = coords_run_or_exit();
+/// match user_choice {
+///     WhichMain::SpamWords => println!("User selected to spam words!"),
+///     _ => {},
+/// }
+/// ```
 fn coords_run_or_exit() -> WhichMain {
     let mut user_input = String::new();
     let stdin = io::stdin();
@@ -141,6 +133,8 @@ fn coords_run_or_exit() -> WhichMain {
             _ => println!("{}: Not a valid choice", user_input),
         };
 
+        // Get the user input, and don't fail if they give an invalid one.
+        // Just keep trying till you get a good one
         loop {
             user_input.clear();
             print!("Your selection (c/m/w/l/e): ");
@@ -161,6 +155,13 @@ fn coords_run_or_exit() -> WhichMain {
     return choice;
 }
 
+/// This function reads a message from the given file, and returns it
+/// This code will be used again at some point, but for the moment languishes, friendless.
+///
+/// # Examples
+/// ```
+/// let message: String = read_message_from_file(Path::new("/path/to/file"));
+/// ```
 fn read_message_from_file(path: &Path) -> String {
     // Open the path in read-only mode, returns `io::Result<File>`
     let display = path.display();
@@ -177,13 +178,15 @@ fn read_message_from_file(path: &Path) -> String {
     }
 }
 
-fn print_by_word(
-    message: &str, 
-    browser_x: i32, 
-    browser_y: i32, 
-    whatsapp_x: i32, 
-    whatsapp_y: i32,
-    ) {
+/// Sends a message word by word to the recipient
+/// Each word is sent as fast as possible, with a potential gap between each message as dictated by
+/// the user. This however is handled seperately.
+///
+/// # Examples
+/// ```
+/// print_by_word("Never gonna give you up", 20, 1900, 989, 941);
+/// ```
+fn print_by_word(message: &str, browser_x: i32, browser_y: i32, whatsapp_x: i32, whatsapp_y: i32) {
     let words = message.split_whitespace();
 
     let mut enigo = Enigo::new();
@@ -202,6 +205,14 @@ fn print_by_word(
     }
 }
 
+/// Sends a message character by character to the recipient
+/// Each character is sent as fast as possible, with a potential gap between each message as dictated by
+/// the user. This however is handled seperately.
+///
+/// # Examples
+/// ```
+/// print_by_character("Never gonna give you up", 20, 1900, 989, 941);
+/// ```
 fn print_by_character(
     message: &str,
     browser_x: i32,
@@ -224,6 +235,13 @@ fn print_by_character(
     }
 }
 
+/// Sends the whole message at a time, with the interval between messages handled by the user
+/// elsewhere.
+///
+/// # Examples
+/// ```
+/// print_whole_message("Never gonna give you up", 20, 1900, 989, 941);
+/// ```
 fn print_whole_message(
     message: &str,
     browser_x: i32,
