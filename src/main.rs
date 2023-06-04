@@ -12,6 +12,8 @@ mod show_screen_coords;
 
 // TODO needs a failsafe of some sort
 
+/// [`WhichMain`] represents the user's choice of what part of the program to run, represented by an enum  
+/// Used by [`coords_run_or_exit()`]
 #[derive(Debug)]
 enum WhichMain {
     GetCoords,
@@ -78,7 +80,7 @@ fn main() {
 /// Gets from the user what part of the program to run, eg show the coordinates
 /// spamming options, or just exiting
 ///
-/// Returns the WhichMain enum, to hold the user choice. This may be matched
+/// Returns [`WhichMain`], to hold the user choice. This may be matched
 /// against for their input
 ///
 ///

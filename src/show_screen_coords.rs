@@ -3,7 +3,7 @@ use std::{thread::sleep, time::Duration};
 use enigo::{Enigo, MouseControllable};
 
 /// Prints the screen coordinates to the terminal every half a second on a loop
-/// Is broken when the cursor goes to the top left corner of the screen.
+/// The loop is exited when the cursor goes to the top left corner of the screen.
 pub fn show_screen_coords() {
     let enigo = Enigo::new();
     loop {

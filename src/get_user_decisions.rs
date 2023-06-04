@@ -1,12 +1,14 @@
 use std::io;
 use std::io::prelude::*;
 
+/// A struct that holds an x and y coordinate that should be within the screen bounds
 #[derive(Debug)]
 pub struct ScreenPosition {
     pub x: i32,
     pub y: i32,
 }
 
+/// A struct that holds the choices made by the user with regards to how the spammer should be run
 #[derive(Debug)]
 pub struct UserSpecifications {
     pub file_or_stdin: String,
@@ -18,7 +20,7 @@ pub struct UserSpecifications {
 }
 
 /// Wrapper function exposed to main.rs that gets all of the information from the user, and then
-/// returns it all in the UserSpecifications struct
+/// returns it all in [`UserSpecifications`]
 ///
 /// # Examples
 /// ```
@@ -106,7 +108,7 @@ fn get_single_position(prompt: &str) -> i32 {
 
 /// Returns the ScreenPosition struct storing the position of a given target
 /// Also takes the name of the target, with any relevant prefixes to be passed to the prompt called
-/// in get_single_position()
+/// in [`get_single_position()`]
 ///
 /// # Examples
 /// ```
@@ -221,7 +223,7 @@ fn get_user_message(target: &String) -> String {
     return String::from(message.trim());
 }
 
-/// Get the message from a file. Currently incomplete and defaults to get_stdin_message()
+/// Get the message from a file. Currently incomplete and defaults to [`get_stdin_message()`]
 fn get_file_message() -> String {
     println!("NOT SUPPORTED: DEFAULTING TO GETTING FROM STDIN");
     let user_input = get_stdin_message();
