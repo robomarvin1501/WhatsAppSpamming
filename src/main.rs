@@ -1,7 +1,5 @@
-use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use std::path::Path;
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -136,29 +134,6 @@ fn coords_run_or_exit() -> WhichMain {
     }
 
     return choice;
-}
-
-/// This function reads a message from the given file, and returns it
-/// This code will be used again at some point, but for the moment languishes, friendless.
-///
-/// # Examples
-/// ```
-/// let message: String = read_message_from_file(Path::new("/path/to/file"));
-/// ```
-fn read_message_from_file(path: &Path) -> String {
-    // Open the path in read-only mode, returns `io::Result<File>`
-    let display = path.display();
-    let mut file = match File::open(path) {
-        Err(why) => panic!("Couldn't open {}: {}", display, why),
-        Ok(file) => file,
-    };
-
-    // Read the file contents into a string, returns `io::Result<usize>`
-    let mut s = String::new();
-    match file.read_to_string(&mut s) {
-        Err(why) => panic!("Couldn't read {}: {}", display, why),
-        Ok(_) => s,
-    }
 }
 
 /// Sends a message word by word to the recipient

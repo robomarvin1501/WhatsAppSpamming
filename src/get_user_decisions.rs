@@ -1,5 +1,7 @@
+use std::fs::File;
 use std::io;
 use std::io::prelude::*;
+use std::path::Path;
 
 /// A struct that holds an x and y coordinate that should be within the screen bounds
 #[derive(Debug)]
@@ -223,11 +225,60 @@ fn get_user_message(target: &String) -> String {
     return String::from(message.trim());
 }
 
-/// Get the message from a file. Currently incomplete and defaults to [`get_stdin_message()`]
+/// Get the message from a file. 
+/// Automatically requests a path from the user.
+///
+/// # Examples
+/// ```
+/// let message: String - get_file_message();
+/// ```
 fn get_file_message() -> String {
-    println!("NOT SUPPORTED: DEFAULTING TO GETTING FROM STDIN");
-    let user_input = get_stdin_message();
-    return user_input;
+    let mut user_input: String = String::new();
+    let mut file_path: &Path;
+    let stdin = io::stdin();
+
+    print!("Please write the path to the file you wish to send: ");
+    io::stdout().flush().unwrap();
+
+    loop {
+        match stdin.read_line(&mut user_input) {
+            Ok(_) => {
+                user_input = String::from(user_input.trim());
+                break;
+            },
+            Err(e) => {
+                println!("ERROR: {e}");
+                println!("Please try again");
+                print!("Please write the path to the file you wish to send: ");
+                io::stdout().flush().unwrap();
+            }
+        }
+    }
+
+    loop {
+        file_path = Path::new(&user_input);
+        if file_path.exists() {
+            break;
+        } else {
+            println!("ERROR: Path {user_input} does not exist!");
+
+            loop {
+                match stdin.read_line(&mut user_input) {
+                    Ok(_) => break,
+                    Err(e) => {
+                        println!("ERROR: {e}");
+                        println!("Please try again");
+                        print!("Please write the path to the file you wish to send: ");
+                        io::stdout().flush().unwrap();
+                    }
+                }
+            }
+        }
+    }
+    match read_message_from_file(file_path) {
+        Ok(result) => result,
+        Err(_) => panic!("Error reading provided file"),
+    }
 }
 
 /// Gets a message from the user via stdin, without failing.
@@ -345,4 +396,24 @@ fn get_repeating_period() -> f64 {
 
     println!("Repeating time: {user_input}");
     user_input.parse::<f64>().unwrap()
+}
+/// This function reads a message from the given file, and returns it
+///
+/// # Examples
+/// ```
+/// let message: String = read_message_from_file(Path::new("/path/to/file"));
+/// ```
+fn read_message_from_file(path: &Path) -> Result<String, io::Error> {
+    // Open the path in read-only mode, returns `io::Result<File>`
+    let mut file = match File::open(path) {
+        Ok(file) => file,
+        Err(e) => return Err(e),
+    };
+
+    // Read the file contents into a string, returns `io::Result<usize>`
+    let mut message = String::new();
+    match file.read_to_string(&mut message) {
+        Ok(_) => Ok(message),
+        Err(e) => Err(e),
+    }
 }
